@@ -3,7 +3,7 @@ import { FiChevronRight } from 'react-icons/fi';
 
 import logoImg from '../../assets/logo.svg';
 import api from '../../services/api';
-import { Form, Title, Users } from './styles';
+import { Error, Form, Title, Users } from './styles';
 
 interface User {
   total_count: number;
@@ -20,17 +20,31 @@ interface UserItems {
 const Dashboard: React.FC = () => {
   const [newUser, setNewUser] = useState('');
   const [users, setUsers] = useState<UserItems[]>([]);
+  const [inputError, setInputError] = useState('');
 
   async function handleAddRepository(
     event: FormEvent<HTMLFormElement>,
   ): Promise<void> {
     event.preventDefault();
 
-    const response = await api.get<User>(`search/users?q=${newUser}`);
-    const repositoryItems = response.data.items;
+    if (!newUser) {
+      setInputError('Please type the user name');
+      return;
+    }
 
-    setUsers(repositoryItems);
-    setNewUser('');
+    try {
+      const response = await api.get<User>(`search/users?q=${newUser}`);
+      const repositoryItems = response.data.items;
+
+      setUsers(repositoryItems);
+      setNewUser('');
+
+      !response.data.items.length
+        ? setInputError(`User: ${newUser} not found`)
+        : setInputError('');
+    } catch (err) {
+      setInputError('Please type the user name');
+    }
   }
 
   return (
@@ -38,7 +52,7 @@ const Dashboard: React.FC = () => {
       <img src={logoImg} alt="Github Explorer" />
       <Title>Explore users on Github</Title>
 
-      <Form onSubmit={handleAddRepository}>
+      <Form hasError={!!inputError} onSubmit={handleAddRepository}>
         <input
           value={newUser}
           onChange={(e) => setNewUser(e.target.value)}
@@ -47,8 +61,10 @@ const Dashboard: React.FC = () => {
         <button type="submit">Search</button>
       </Form>
 
+      {!!inputError && <Error>{inputError}</Error>}
+
       <Users>
-        {users?.map((repository) => (
+        {users.map((repository) => (
           <a key={repository.login} href="#">
             <img src={repository.avatar_url} alt={repository.login}></img>
             <div>

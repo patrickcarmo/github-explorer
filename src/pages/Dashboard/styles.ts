@@ -1,5 +1,5 @@
 import { shade } from 'polished';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const colorGray = '#3a3a3a';
 const marginTop = '80px';
@@ -7,6 +7,11 @@ const maxWidth = '700px';
 const formHeight = '70px';
 const colorGreen = '#04d361';
 const colorWhite = '#fff';
+const colorRed = '#c53030';
+
+interface FormProps {
+  hasError: boolean;
+}
 
 export const Title = styled.h1`
   font-size: 48px;
@@ -16,7 +21,7 @@ export const Title = styled.h1`
   margin-top: ${marginTop};
 `;
 
-export const Form = styled.form`
+export const Form = styled.form<FormProps>`
   margin-top: calc(${marginTop} / 2);
   max-width: ${maxWidth};
   display: flex;
@@ -26,8 +31,15 @@ export const Form = styled.form`
     flex: 1;
     height: ${formHeight};
     padding: 0 24px;
-    border: 0;
     border-radius: 5px 0 0 5px;
+    border: 2px solid ${colorWhite};
+    border-right: 0;
+
+    ${(props) =>
+      props.hasError &&
+      css`
+        border-color: ${colorRed};
+      `}
 
     &::placeholder {
       color: #a8a8b3;
@@ -48,6 +60,12 @@ export const Form = styled.form`
       background: ${shade(0.2, colorGreen)};
     }
   }
+`;
+
+export const Error = styled.span`
+  display: block;
+  color: ${colorRed};
+  margin-top: 8px;
 `;
 
 export const Users = styled.div`
