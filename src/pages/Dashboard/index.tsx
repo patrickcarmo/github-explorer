@@ -3,62 +3,62 @@ import { FiChevronRight } from 'react-icons/fi';
 
 import logoImg from '../../assets/logo.svg';
 import api from '../../services/api';
-import { Form, Repositories, Title } from './styles';
+import { Form, Title, Users } from './styles';
 
-interface Repository {
-  full_name: string;
-  description: string;
-  owner: {
-    login: string;
-    avatar_url: string;
-  };
+interface User {
+  total_count: number;
+  incomplete_results: boolean;
+  items: UserItems[];
+}
+
+interface UserItems {
+  login: string;
+  avatar_url: string;
+  type: string;
 }
 
 const Dashboard: React.FC = () => {
-  const [newRepo, setNewRepo] = useState('');
-  const [repositories, setRepositories] = useState<Repository[]>([]);
+  const [newUser, setNewUser] = useState('');
+  const [users, setUsers] = useState<UserItems[]>([]);
 
   async function handleAddRepository(
     event: FormEvent<HTMLFormElement>,
   ): Promise<void> {
     event.preventDefault();
 
-    const response = await api.get<Repository>(`repos/${newRepo}`);
-    const repository = response.data;
+    const response = await api.get<User>(`search/users?q=${newUser}`);
+    const repositoryItems = response.data.items;
 
-    setRepositories([...repositories, repository]);
-    setNewRepo('');
+    setUsers(repositoryItems);
+    setNewUser('');
   }
 
   return (
     <React.Fragment>
       <img src={logoImg} alt="Github Explorer" />
-      <Title>Explore repositories on Github</Title>
+      <Title>Explore users on Github</Title>
 
       <Form onSubmit={handleAddRepository}>
         <input
-          value={newRepo}
-          onChange={(e) => setNewRepo(e.target.value)}
-          placeholder="Type the repository name"
+          value={newUser}
+          onChange={(e) => setNewUser(e.target.value)}
+          placeholder="Type the user name"
         />
         <button type="submit">Search</button>
       </Form>
 
-      <Repositories>
-        {repositories.map((repository) => (
-          <a key={repository.full_name} href="#">
-            <img
-              src={repository.owner.avatar_url}
-              alt={repository.owner.login}
-            ></img>
+      <Users>
+        {users?.map((repository) => (
+          <a key={repository.login} href="#">
+            <img src={repository.avatar_url} alt={repository.login}></img>
             <div>
-              <strong>{repository.full_name}</strong>
-              <p>{repository.description}</p>
+              <strong>{repository.login}</strong>
+              <p>{repository.type}</p>
             </div>
             <FiChevronRight size={20} />
           </a>
         ))}
-      </Repositories>
+      </Users>
     </React.Fragment>
   );
 };

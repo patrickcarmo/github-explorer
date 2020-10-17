@@ -50,7 +50,7 @@ export const Form = styled.form`
   }
 `;
 
-export const Repositories = styled.div`
+export const Users = styled.div`
   margin-top: calc(${marginTop} / 2);
   max-width: ${maxWidth};
 
