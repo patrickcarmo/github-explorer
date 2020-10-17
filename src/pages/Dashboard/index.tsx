@@ -1,5 +1,6 @@
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import { FiChevronRight } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 
 import logoImg from '../../assets/logo.svg';
 import api from '../../services/api';
@@ -19,8 +20,16 @@ interface UserItems {
 
 const Dashboard: React.FC = () => {
   const [newUser, setNewUser] = useState('');
-  const [users, setUsers] = useState<UserItems[]>([]);
+  const [users, setUsers] = useState<UserItems[]>(() => {
+    const storagedUsers = localStorage.getItem('@GithubExplorer:users');
+
+    return !!storagedUsers ? JSON.parse(storagedUsers) : [];
+  });
   const [inputError, setInputError] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('@GithubExplorer:users', JSON.stringify(users));
+  }, [users]);
 
   async function handleAddRepository(
     event: FormEvent<HTMLFormElement>,
@@ -48,7 +57,7 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <React.Fragment>
+    <>
       <img src={logoImg} alt="Github Explorer" />
       <Title>Explore users on Github</Title>
 
@@ -64,18 +73,18 @@ const Dashboard: React.FC = () => {
       {!!inputError && <Error>{inputError}</Error>}
 
       <Users>
-        {users.map((repository) => (
-          <a key={repository.login} href="#">
-            <img src={repository.avatar_url} alt={repository.login}></img>
+        {users.map((user) => (
+          <Link key={user.login} to={`/user/${user.login}`}>
+            <img src={user.avatar_url} alt={user.login}></img>
             <div>
-              <strong>{repository.login}</strong>
-              <p>{repository.type}</p>
+              <strong>{user.login}</strong>
+              <p>{user.type}</p>
             </div>
             <FiChevronRight size={20} />
-          </a>
+          </Link>
         ))}
       </Users>
-    </React.Fragment>
+    </>
   );
 };
 
